@@ -1,0 +1,83 @@
+{
+  "dataset_id": "day04_v2_research_group",
+  "dataset_role": "group",
+  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
+  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
+  "cases": [
+    {
+      "id": "G01_weather_routing_basic",
+      "phase": "B",
+      "suite": "group",
+      "query": "Thời tiết ở Hà Nội hôm nay thế nào?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "weather",
+            "args": {
+              "city": "Hà Nội"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "routing_custom_tool",
+        "difficulty": "easy",
+        "what_it_tests": "Kiểm tra Agent định tuyến chính xác yêu cầu thời tiết sang công cụ weather tự dựng thay vì lookup web thông thường."
+      }
+    },
+    {
+      "id": "G02_weather_missing_city",
+      "phase": "B",
+      "suite": "group",
+      "query": "Nhiệt độ hiện tại ở đây là bao nhiêu độ?",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_missing_param",
+        "difficulty": "medium",
+        "what_it_tests": "Người dùng hỏi thời tiết nhưng không đưa tên thành phố cụ thể ('ở đây'). Agent phải gọi clarify yêu cầu cung cấp thông tin, cấm tự đoán bừa."
+      }
+    },
+    {
+      "id": "G03_weather_multiturn_carryover",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Kiểm tra thời tiết ở Đà Nẵng giúp mình."
+        },
+        {
+          "role": "user",
+          "content": "Còn ở Sài Gòn thì sao?"
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "weather",
+            "args": {
+              "city": "Sài Gòn"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_arg_switch",
+        "difficulty": "hard",
+        "what_it_tests": "Hội thoại nhiều lượt (Multiturn). Lượt sau người dùng đổi địa điểm sang Sài Gòn nhưng vẫn giữ nguyên ý định hỏi thời tiết. Agent phải cập nhật chính xác tham số city thành Sài Gòn."
+      }
+    }
+  ]
+}
